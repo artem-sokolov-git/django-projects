@@ -20,12 +20,14 @@ class Project:
         try:
             subprocess.run(["python", "-m", "venv", self.venv], check=True)
         except subprocess.CalledProcessError as e:
-            return print(e)
+            raise RuntimeError(f"Failed to create virtual environment: {e}")
 
     def update_pip(self):
         if not self.venv.exists():
             raise FileNotFoundError("Виртуальное окружение на найдено!")
         try:
-            subprocess.run([self.venv / "bin" / "pip", "install", "--upgrade", "pip"])
+            subprocess.run(
+                [self.venv / "bin" / "pip", "install", "--upgrade", "pip"], check=True
+            )
         except subprocess.CalledProcessError as e:
-            return print(e)
+            raise RuntimeError(f"Failed to update pip: {e}")

@@ -1,5 +1,7 @@
 import shutil
+import subprocess
 import unittest
+import unittest.mock
 from pathlib import Path
 
 from project_manager import Project
@@ -39,11 +41,31 @@ class TestProjectManager(unittest.TestCase):
         with self.assertRaises(FileExistsError):
             self.test_project.create_virtualenv()
 
+    def test_create_virtualenv_failure(self):
+        self.test_project.create_directory()
+        with unittest.mock.patch(
+            "subprocess.run", side_effect=subprocess.CalledProcessError(1, "venv")
+        ):
+            with self.assertRaises(RuntimeError):
+                self.test_project.create_virtualenv()
+
     def test_update_pip_success(self):
         self.test_project.create_directory()
         self.test_project.create_virtualenv()
         self.test_project.update_pip()
 
+    def test_update_pip_no_virtualenv(self):
+        with self.assertRaises(FileNotFoundError):
+            self.test_project.update_pip()
+
+    def test_update_pip_failure(self):
+        self.test_project.create_directory()
+        self.test_project.create_virtualenv()
+        with unittest.mock.patch(
+            "subprocess.run", side_effect=subprocess.CalledProcessError(1, "pip")
+        ):
+            with self.assertRaises(RuntimeError):
+                self.test_project.update_pip()
 
 
 if __name__ == "__main__":
