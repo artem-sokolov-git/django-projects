@@ -1,5 +1,5 @@
-from pathlib import Path
 import subprocess
+from pathlib import Path
 
 
 class Project:
@@ -17,4 +17,15 @@ class Project:
     def create_virtualenv(self):
         if self.venv.exists():
             raise FileExistsError("Виртуальное окружение уже создано!")
-        subprocess.run(['python', '-m', 'venv', self.venv])
+        try:
+            subprocess.run(["python", "-m", "venv", self.venv], check=True)
+        except subprocess.CalledProcessError as e:
+            return print(e)
+
+    def update_pip(self):
+        if not self.venv.exists():
+            raise FileNotFoundError("Виртуальное окружение на найдено!")
+        try:
+            subprocess.run([self.venv / "bin" / "pip", "install", "--upgrade", "pip"])
+        except subprocess.CalledProcessError as e:
+            return print(e)
