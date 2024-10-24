@@ -17,6 +17,9 @@ class TestProjectManager(unittest.TestCase):
         if self.test_project.path.exists():
             shutil.rmtree(self.test_project.path)
 
+
+class TestCreateDirectory(TestProjectManager):
+
     def test_create_directory_success(self):
         """Тест на успешное создание папки"""
         self.test_project.create_directory()
@@ -29,6 +32,8 @@ class TestProjectManager(unittest.TestCase):
         self.test_project.create_directory()
         with self.assertRaises(FileExistsError):
             self.test_project.create_directory()
+
+class TestCreateVirtualenv(TestProjectManager):
 
     def test_create_virtualenv_success(self):
         self.test_project.create_directory()
@@ -43,11 +48,10 @@ class TestProjectManager(unittest.TestCase):
 
     def test_create_virtualenv_failure(self):
         self.test_project.create_directory()
-        with unittest.mock.patch(
-            "subprocess.run", side_effect=subprocess.CalledProcessError(1, "venv")
-        ):
-            with self.assertRaises(RuntimeError):
-                self.test_project.create_virtualenv()
+        with self.assertRaises(RuntimeError): # внутр. mock не нужен.
+            self.test_project.create_virtualenv()
+
+class TestUpdatePip(TestProjectManager):
 
     def test_update_pip_success(self):
         self.test_project.create_directory()
@@ -61,12 +65,11 @@ class TestProjectManager(unittest.TestCase):
     def test_update_pip_failure(self):
         self.test_project.create_directory()
         self.test_project.create_virtualenv()
-        with unittest.mock.patch(
+        with unittest.mock.patch( # внешняя команда нужен mock
             "subprocess.run", side_effect=subprocess.CalledProcessError(1, "pip")
         ):
             with self.assertRaises(RuntimeError):
                 self.test_project.update_pip()
-
 
 if __name__ == "__main__":
     unittest.main()
